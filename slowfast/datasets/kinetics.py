@@ -376,6 +376,8 @@ class Kinetics(torch.utils.data.Dataset):
             frames_decoded = frames
             time_idx_decoded = time_idx
 
+            print(f"{len(frames_decoded)=}, {frames_decoded[0].shape}")
+
             # If decoding failed (wrong format, video is too short, and etc),
             # select another video.
             if frames_decoded is None or None in frames_decoded:
@@ -402,6 +404,8 @@ class Kinetics(torch.utils.data.Dataset):
             idx = -1
             label = self._labels[index]
 
+            print(f"{num_decode=}, {num_aug=}, {num_out=}")
+
             for i in range(num_decode):
                 for _ in range(num_aug):
                     idx += 1
@@ -410,6 +414,8 @@ class Kinetics(torch.utils.data.Dataset):
 
                     f_out[idx] = f_out[idx].float()
                     f_out[idx] = f_out[idx] / 255.0
+
+                    print(f"418 {f_out[0].shape=}")
 
                     if (
                         self.mode in ["train"]
@@ -425,6 +431,8 @@ class Kinetics(torch.utils.data.Dataset):
                             gaussan_sigma_max=self.cfg.DATA.SSL_BLUR_SIGMA_MAX,
                         )
 
+                    print(f"434 {f_out[0].shape=}")
+
                     if self.aug and self.cfg.AUG.AA_TYPE:
                         aug_transform = create_random_augment(
                             input_size=(f_out[idx].size(1), f_out[idx].size(2)),
@@ -437,6 +445,8 @@ class Kinetics(torch.utils.data.Dataset):
                         list_img = aug_transform(list_img)
                         f_out[idx] = self._list_img_to_frames(list_img)
                         f_out[idx] = f_out[idx].permute(0, 2, 3, 1)
+
+                    print(f"449 {f_out[0].shape=}")
 
                     # Perform color normalization.
                     f_out[idx] = utils.tensor_normalize(
@@ -475,6 +485,8 @@ class Kinetics(torch.utils.data.Dataset):
                         else False,
                     )
 
+                    print(f"488 {f_out[0].shape=}")
+
                     if self.rand_erase:
                         erase_transform = RandomErasing(
                             self.cfg.AUG.RE_PROB,
@@ -487,10 +499,16 @@ class Kinetics(torch.utils.data.Dataset):
                             f_out[idx].permute(1, 0, 2, 3)
                         ).permute(1, 0, 2, 3)
 
+                    print(f"502 {f_out[0].shape=}")
+
+
                     f_out[idx] = utils.pack_pathway_output(self.cfg, f_out[idx])
+
+                    print(f"507 {len(f_out[0])}, {f_out[0][0].shape=}")
                     if self.cfg.AUG.GEN_MASK_LOADER:
                         mask = self._gen_mask()
                         f_out[idx] = f_out[idx] + [torch.Tensor(), mask]
+                        print(f"511 {f_out[0].shape=}")
             frames = f_out[0] if num_out == 1 else f_out
             time_idx = np.array(time_idx_out)
             if (

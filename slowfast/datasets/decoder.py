@@ -494,6 +494,7 @@ def decode(
     Returns:
         frames (tensor): decoded frames from the video.
     """
+    print(f'{sampling_rate=}, {num_frames=}, {clip_idx=}, {num_clips_uniform=}, {video_meta=}, {target_fps=}, {max_spatial_scale=}, {use_offset=}, {time_diff_prob=}, {gaussian_prob=}, {min_delta=}, {max_delta=}')
     # Currently support two decoders: 1) PyAV, and 2) TorchVision.
     assert clip_idx >= -1, "Not valied clip_idx {}".format(clip_idx)
     assert len(sampling_rate) == len(num_frames)
